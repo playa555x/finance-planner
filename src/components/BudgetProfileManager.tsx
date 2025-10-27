@@ -82,10 +82,25 @@ export default function BudgetProfileManager({ onProfileSelect }: BudgetProfileM
 
   useEffect(() => {
     // Load profiles from localStorage
-    const savedProfiles = localStorage.getItem('budgetProfiles');
-    if (savedProfiles) {
-      setProfiles(JSON.parse(savedProfiles));
-    }
+    const loadProfiles = () => {
+      const savedProfiles = localStorage.getItem('budgetProfiles');
+      if (savedProfiles) {
+        const parsed = JSON.parse(savedProfiles);
+        console.log('📊 Loaded budget profiles:', parsed);
+        setProfiles(parsed);
+      }
+    };
+
+    loadProfiles();
+
+    // Listen for updates
+    const handleUpdate = () => {
+      console.log('🔄 Budget profile updated, reloading...');
+      loadProfiles();
+    };
+
+    window.addEventListener('budgetProfileUpdated', handleUpdate);
+    return () => window.removeEventListener('budgetProfileUpdated', handleUpdate);
   }, []);
 
   const handleProfileClick = (profile: BudgetProfile) => {

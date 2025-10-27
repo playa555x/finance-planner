@@ -360,37 +360,47 @@ export default function BaliFinancePlanner() {
 
   // Save plan to budget profile
   const saveToBudgetProfile = (planData: any) => {
-    const budgetProfile = {
-      id: Date.now().toString(),
-      name: `${planData.lifestyleLevel} Budget - ${new Date().toLocaleDateString('de-DE')}`,
-      lifestyleLevel: planData.lifestyleLevel,
-      duration: planData.duration,
-      persons: planData.persons,
-      totalBudget: planData.totalCostEUR,
-      dailyBudget: planData.totalCostEUR / planData.duration,
-      weeklyBudget: (planData.totalCostEUR / planData.duration) * 7,
-      monthlyBudget: (planData.totalCostEUR / planData.duration) * 30,
-      currency: 'EUR',
-      categories: planData.categories.map((cat: any) => ({
-        category: cat.category,
-        subcategory: cat.subcategory || cat.description || '',
-        dailyBudget: cat.monthlyEUR / 30,
-        weeklyBudget: (cat.monthlyEUR / 30) * 7,
-        monthlyBudget: cat.monthlyEUR,
-        icon: cat.icon?.name || 'DollarSign',
-        color: cat.color || 'bg-gray-500',
-        spent: 0
-      })),
-      createdAt: new Date().toISOString()
-    };
+    try {
+      console.log('💾 Saving to budget profile...', planData);
 
-    // Save to localStorage
-    const existingProfiles = JSON.parse(localStorage.getItem('budgetProfiles') || '[]');
-    const updatedProfiles = [budgetProfile, ...existingProfiles];
-    localStorage.setItem('budgetProfiles', JSON.stringify(updatedProfiles));
+      const budgetProfile = {
+        id: Date.now().toString(),
+        name: `${planData.lifestyleLevel} Budget - ${new Date().toLocaleDateString('de-DE')}`,
+        lifestyleLevel: planData.lifestyleLevel,
+        duration: planData.duration,
+        persons: planData.persons,
+        totalBudget: planData.totalCostEUR,
+        dailyBudget: planData.totalCostEUR / planData.duration,
+        weeklyBudget: (planData.totalCostEUR / planData.duration) * 7,
+        monthlyBudget: (planData.totalCostEUR / planData.duration) * 30,
+        currency: 'EUR',
+        categories: planData.categories.map((cat: any) => ({
+          category: cat.category,
+          subcategory: cat.subcategory || cat.description || '',
+          dailyBudget: cat.monthlyEUR / 30,
+          weeklyBudget: (cat.monthlyEUR / 30) * 7,
+          monthlyBudget: cat.monthlyEUR,
+          icon: cat.icon?.name || 'DollarSign',
+          color: cat.color || 'bg-gray-500',
+          spent: 0
+        })),
+        createdAt: new Date().toISOString()
+      };
 
-    // Show success message
-    console.log('✅ Budget-Profil gespeichert!', budgetProfile);
+      console.log('📦 Budget profile created:', budgetProfile);
+
+      // Save to localStorage
+      const existingProfiles = JSON.parse(localStorage.getItem('budgetProfiles') || '[]');
+      const updatedProfiles = [budgetProfile, ...existingProfiles];
+      localStorage.setItem('budgetProfiles', JSON.stringify(updatedProfiles));
+
+      console.log('✅ Budget-Profil gespeichert!', updatedProfiles);
+
+      // Trigger a custom event to notify BudgetProfileManager
+      window.dispatchEvent(new CustomEvent('budgetProfileUpdated'));
+    } catch (error) {
+      console.error('❌ Error saving budget profile:', error);
+    }
   };
 
   const exportPlan = async (format: 'excel' | 'pdf') => {
