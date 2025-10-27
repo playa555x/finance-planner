@@ -47,10 +47,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     id: 4,
-    title: 'Schritt 3: Details anpassen',
-    description: 'Jetzt kannst du einzelne Kategorien (Unterkunft, Essen, Transport etc.) individuell anpassen. Klicke einfach auf eine Kategorie!',
+    title: 'Schritt 3: Budget anpassen',
+    description: 'Passe dein Tages-, Wochen- oder Monatsbudget an. Gehe zum "Budget" Tab um dein Budget manuell zu verwalten.',
     icon: Edit,
-    action: 'Klicke auf eine Budget-Kategorie zum Bearbeiten'
+    action: 'Wechsle zum "Budget" Tab'
   },
   {
     id: 5,

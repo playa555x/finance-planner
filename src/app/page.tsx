@@ -232,6 +232,8 @@ export default function BaliFinancePlanner() {
     homeCountry: 'Germany',
     monthlyIncome: 2500, // New field for monthly income in EUR
     totalBudget: 0, // New field for total budget in EUR
+    manualBudget: 0, // Manual budget input
+    budgetPeriod: 'daily', // daily, weekly, monthly
   });
 
   // Calculate automatic daily budget based on income
@@ -609,6 +611,91 @@ export default function BaliFinancePlanner() {
                         </Button>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Manual Budget Control */}
+                  <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <PiggyBank className="h-5 w-5 text-blue-600" />
+                      <Label className="text-lg font-semibold">Manuelles Budget</Label>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Budget Amount */}
+                      <div className="space-y-2">
+                        <Label htmlFor="manualBudget">Budget-Betrag</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="manualBudget"
+                            type="number"
+                            min="0"
+                            step="10"
+                            placeholder="z.B. 50"
+                            value={formData.manualBudget || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, manualBudget: parseInt(e.target.value) || 0 }))}
+                            className="flex-1"
+                          />
+                          <span className="text-sm text-gray-500">EUR</span>
+                        </div>
+                      </div>
+
+                      {/* Budget Period Selector */}
+                      <div className="space-y-2">
+                        <Label htmlFor="budgetPeriod">Zeitraum</Label>
+                        <Select
+                          value={formData.budgetPeriod}
+                          onValueChange={(value) => setFormData(prev => ({ ...prev, budgetPeriod: value }))}
+                        >
+                          <SelectTrigger id="budgetPeriod">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Pro Tag</SelectItem>
+                            <SelectItem value="weekly">Pro Woche</SelectItem>
+                            <SelectItem value="monthly">Pro Monat</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Budget Preview */}
+                    {formData.manualBudget > 0 && (
+                      <div className="mt-3 p-3 bg-blue-100 border border-blue-300 rounded-lg">
+                        <div className="text-sm font-medium text-blue-800 mb-2">Dein Budget:</div>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div>
+                            <div className="text-blue-600">Pro Tag:</div>
+                            <div className="font-semibold">
+                              {formData.budgetPeriod === 'daily'
+                                ? formData.manualBudget
+                                : formData.budgetPeriod === 'weekly'
+                                ? Math.round(formData.manualBudget / 7)
+                                : Math.round(formData.manualBudget / 30)} EUR
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-blue-600">Pro Woche:</div>
+                            <div className="font-semibold">
+                              {formData.budgetPeriod === 'daily'
+                                ? formData.manualBudget * 7
+                                : formData.budgetPeriod === 'weekly'
+                                ? formData.manualBudget
+                                : Math.round(formData.manualBudget / 4.3)} EUR
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-blue-600">Pro Monat:</div>
+                            <div className="font-semibold">
+                              {formData.budgetPeriod === 'daily'
+                                ? formData.manualBudget * 30
+                                : formData.budgetPeriod === 'weekly'
+                                ? Math.round(formData.manualBudget * 4.3)
+                                : formData.manualBudget} EUR
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Pet Section */}
