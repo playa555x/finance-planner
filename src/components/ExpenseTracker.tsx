@@ -38,22 +38,26 @@ interface ExpenseEntry {
 }
 
 interface ExpenseTrackerProps {
-  categories: Array<{
+  userId?: string;
+  onExpenseUpdate?: (expense: any) => void;
+  categories?: Array<{
     category: string;
     subcategory: string;
     monthlyEUR: number;
     monthlyIDR: number;
   }>;
-  currency: string;
-  exchangeRate: number;
-  totalMonthlyBudget: number;
+  currency?: string;
+  exchangeRate?: number;
+  totalMonthlyBudget?: number;
 }
 
 export default function ExpenseTracker({
-  categories,
-  currency,
-  exchangeRate,
-  totalMonthlyBudget
+  userId = 'demo-user',
+  onExpenseUpdate,
+  categories = [],
+  currency = 'EUR',
+  exchangeRate = 1,
+  totalMonthlyBudget = 0
 }: ExpenseTrackerProps) {
   const [isAddingExpense, setIsAddingExpense] = useState(false);
   const [trackingMode, setTrackingMode] = useState<'category' | 'total'>('category');

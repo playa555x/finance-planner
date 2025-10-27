@@ -247,13 +247,51 @@ export default function BaliFinancePlanner() {
     // Calculate daily budget (70% of income for daily expenses, 30% for savings/fixed costs)
     const dailyBudgetIDR = (adjustedMonthlyIncomeIDR * 0.7) / 30;
     const dailyBudgetEUR = dailyBudgetIDR / (detectedExchangeRate || 19255);
-    
+
     return {
       dailyIDR: Math.round(dailyBudgetIDR),
       dailyEUR: Math.round(dailyBudgetEUR * 100) / 100,
       monthlyIDR: Math.round(adjustedMonthlyIncomeIDR * 0.7),
       monthlyEUR: Math.round((monthlyIncomeEUR * 0.7) * 100) / 100
     };
+  };
+
+  // Calculate budget analysis
+  const calculateBudgetAnalysis = (totalCostEUR: number) => {
+    if (!formData.totalBudget || formData.totalBudget === 0) {
+      return {
+        status: 'none',
+        message: 'Kein Budget gesetzt',
+        difference: 0,
+        dailyAvailable: 0
+      };
+    }
+
+    const difference = formData.totalBudget - totalCostEUR;
+    const dailyDifference = difference / formData.duration;
+
+    if (Math.abs(difference) < 10) {
+      return {
+        status: 'exact',
+        message: 'Perfekt im Budget!',
+        difference: difference,
+        dailyAvailable: dailyDifference
+      };
+    } else if (difference > 0) {
+      return {
+        status: 'under',
+        message: 'Unter Budget - gut gemacht!',
+        difference: difference,
+        dailyAvailable: dailyDifference
+      };
+    } else {
+      return {
+        status: 'over',
+        message: 'Über Budget - Anpassung nötig',
+        difference: difference,
+        dailyAvailable: dailyDifference
+      };
+    }
   };
 
   const calculatePlan = async () => {
