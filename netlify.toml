@@ -1,28 +1,6 @@
 [build]
-  command = "npm run build"
+  command = "npx prisma generate && npm run build"
   publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[build.environment]
-  NODE_VERSION = "18"
-
-# Redirect all requests to Next.js
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server/:splat"
-  status = 200
-
-# API routes
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server/api/:splat"
-  status = 200
-
-# WebSocket support for Socket.IO
-[[redirects]]
-  from = "/socket.io/*"
-  to = "/.netlify/functions/server/socket.io/:splat"
-  status = 200
-  force = true
