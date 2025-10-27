@@ -235,6 +235,7 @@ export default function BaliFinancePlanner() {
     totalBudget: 0, // New field for total budget in EUR
     manualBudget: 0, // Manual budget input
     budgetPeriod: 'daily', // daily, weekly, monthly
+    budgetMode: 'auto', // 'auto' or 'manual'
   });
 
   // Calculate automatic daily budget based on income
@@ -584,10 +585,74 @@ export default function BaliFinancePlanner() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
-                  {/* Lifestyle Selection */}
-                  <div className="space-y-4">
-                    <Label className="text-lg font-semibold">Lifestyle Level</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Budget Mode Toggle */}
+                  <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Calculator className="h-5 w-5 text-purple-600" />
+                        <Label className="text-lg font-semibold">Budget-Modus wählen</Label>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <Card
+                        className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                          formData.budgetMode === 'auto'
+                            ? 'ring-2 ring-purple-500 shadow-lg bg-purple-50'
+                            : 'hover:scale-105'
+                        }`}
+                        onClick={() => setFormData(prev => ({ ...prev, budgetMode: 'auto' }))}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-purple-100 rounded-full">
+                              <Calculator className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-sm mb-1">Automatisch berechnen</h3>
+                              <p className="text-xs text-gray-600">
+                                Budget wird basierend auf Einkommen und Lifestyle automatisch berechnet
+                              </p>
+                            </div>
+                            {formData.budgetMode === 'auto' && (
+                              <CheckCircle className="h-5 w-5 text-purple-600" />
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card
+                        className={`cursor-pointer transition-all duration-300 hover:shadow-lg ${
+                          formData.budgetMode === 'manual'
+                            ? 'ring-2 ring-blue-500 shadow-lg bg-blue-50'
+                            : 'hover:scale-105'
+                        }`}
+                        onClick={() => setFormData(prev => ({ ...prev, budgetMode: 'manual' }))}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-blue-100 rounded-full">
+                              <PiggyBank className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-sm mb-1">Manuell eingeben</h3>
+                              <p className="text-xs text-gray-600">
+                                Gib dein eigenes Budget pro Tag, Woche oder Monat ein
+                              </p>
+                            </div>
+                            {formData.budgetMode === 'manual' && (
+                              <CheckCircle className="h-5 w-5 text-blue-600" />
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Lifestyle Selection - Only show in auto mode */}
+                  {formData.budgetMode === 'auto' && (
+                    <div className="space-y-4">
+                      <Label className="text-lg font-semibold">Lifestyle Level</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {Object.entries(lifestyleDescriptions).map(([level, desc]) => (
                         <Card 
                           key={level}
@@ -612,11 +677,14 @@ export default function BaliFinancePlanner() {
                       ))}
                     </div>
                   </div>
+                  )}
 
-                  {/* Basic Parameters */}
+                  {/* Basic Parameters - Always show duration and persons */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="income">Monatliche Einnahmen (EUR)</Label>
+                    {/* Income field - only in auto mode */}
+                    {formData.budgetMode === 'auto' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="income">Monatliche Einnahmen (EUR)</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           id="income"
@@ -633,10 +701,12 @@ export default function BaliFinancePlanner() {
                         Automatisches Tagesbudget: {calculateAutoDailyBudget().dailyEUR} EUR ({calculateAutoDailyBudget().dailyIDR.toLocaleString()} IDR)
                       </p>
                     </div>
+                    )}
 
-                    {/* Total Budget Field */}
-                    <div className="space-y-2">
-                      <Label htmlFor="totalBudget">Gesamtbudget (Optional)</Label>
+                    {/* Total Budget Field - only in auto mode */}
+                    {formData.budgetMode === 'auto' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="totalBudget">Gesamtbudget (Optional)</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           id="totalBudget"
@@ -654,7 +724,9 @@ export default function BaliFinancePlanner() {
                         Gesamtbudget für {formData.duration} Tage - zeigt Budget-Status an
                       </p>
                     </div>
+                    )}
 
+                    {/* Duration - always show */}
                     <div className="space-y-2">
                       <Label htmlFor="duration">Aufenthaltsdauer</Label>
                       <div className="flex items-center gap-2">
@@ -701,8 +773,9 @@ export default function BaliFinancePlanner() {
                     </div>
                   </div>
 
-                  {/* Manual Budget Control */}
-                  <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  {/* Manual Budget Control - Only show in manual mode */}
+                  {formData.budgetMode === 'manual' && (
+                    <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center gap-2 mb-3">
                       <PiggyBank className="h-5 w-5 text-blue-600" />
                       <Label className="text-lg font-semibold">Manuelles Budget</Label>
@@ -785,6 +858,7 @@ export default function BaliFinancePlanner() {
                       </div>
                     )}
                   </div>
+                  )}
 
                   {/* Pet Section */}
                   <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
