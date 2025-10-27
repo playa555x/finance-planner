@@ -1187,7 +1187,7 @@ export default function BaliFinancePlanner() {
                         {plan.pets}
                       </div>
                       <div className="text-sm opacity-90">
-                        {plan.pets > 0 ? formatCurrency(plan.breakdown.pets.eur * 12, 'EUR')/Jahr : 'Keine'}
+                        {plan.pets > 0 ? `${formatCurrency(plan.breakdown.pets.eur * 12, 'EUR')}/Jahr` : 'Keine'}
                       </div>
                     </CardContent>
                   </Card>
