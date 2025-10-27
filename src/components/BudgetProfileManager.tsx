@@ -109,6 +109,34 @@ export default function BudgetProfileManager({ onProfileSelect }: BudgetProfileM
     onProfileSelect?.(profile);
   };
 
+  const handleDeleteProfile = (profileId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (confirm('Möchtest du dieses Budget-Profil wirklich löschen?')) {
+      const updatedProfiles = profiles.filter(p => p.id !== profileId);
+      setProfiles(updatedProfiles);
+      localStorage.setItem('budgetProfiles', JSON.stringify(updatedProfiles));
+
+      // If deleted profile was selected, close details view
+      if (selectedProfile?.id === profileId) {
+        setSelectedProfile(null);
+        setShowCategories(false);
+      }
+
+      console.log('🗑️ Profile deleted:', profileId);
+    }
+  };
+
+  const handleDeleteAllProfiles = () => {
+    if (confirm('Möchtest du wirklich ALLE Budget-Profile löschen?')) {
+      localStorage.removeItem('budgetProfiles');
+      setProfiles([]);
+      setSelectedProfile(null);
+      setShowCategories(false);
+      console.log('🗑️ All profiles deleted');
+    }
+  };
+
   const formatCurrency = (amount: number, currency: string = 'EUR') => {
     return new Intl.NumberFormat('de-DE', {
       style: 'currency',
@@ -164,13 +192,28 @@ export default function BudgetProfileManager({ onProfileSelect }: BudgetProfileM
       <div className="space-y-4">
         <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-6 w-6" />
-              Deine Budget-Profile
-            </CardTitle>
-            <CardDescription className="text-blue-100">
-              Klicke auf ein Profil um Details zu sehen
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-6 w-6" />
+                  Deine Budget-Profile
+                </CardTitle>
+                <CardDescription className="text-blue-100">
+                  Klicke auf ein Profil um Details zu sehen
+                </CardDescription>
+              </div>
+              {profiles.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500 hover:bg-red-600 text-white border-red-600"
+                  onClick={handleDeleteAllProfiles}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Alle löschen
+                </Button>
+              )}
+            </div>
           </CardHeader>
         </Card>
 
@@ -178,7 +221,7 @@ export default function BudgetProfileManager({ onProfileSelect }: BudgetProfileM
           {profiles.map((profile) => (
             <Card
               key={profile.id}
-              className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105"
+              className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105 relative"
               onClick={() => handleProfileClick(profile)}
             >
               <CardContent className="p-6">
@@ -189,7 +232,17 @@ export default function BudgetProfileManager({ onProfileSelect }: BudgetProfileM
                       {profile.lifestyleLevel}
                     </Badge>
                   </div>
-                  <ChevronRight className="h-6 w-6 text-gray-400" />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => handleDeleteProfile(profile.id, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <ChevronRight className="h-6 w-6 text-gray-400" />
+                  </div>
                 </div>
 
                 <div className="space-y-3">
