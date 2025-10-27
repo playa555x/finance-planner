@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,29 +23,26 @@ export default function SignInPage() {
     setError('');
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
-        setError('Invalid email or password');
-        setLoading(false);
-      } else {
-        // Check if admin or regular user
-        const response = await fetch('/api/auth/session');
-        const session = await response.json();
+      const data = await response.json();
 
-        // Redirect based on role
-        if (email === 'emir@admin.com') {
-          router.push('/admin');
-        } else {
-          router.push('/');
-        }
+      if (!response.ok) {
+        setError(data.error || 'Login fehlgeschlagen');
+        setLoading(false);
+        return;
       }
+
+      // Login successful - redirect to main page
+      router.push('/');
+      router.refresh();
+
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
       setLoading(false);
     }
   };
@@ -70,11 +66,11 @@ export default function SignInPage() {
                 <MapPin className="h-8 w-8 text-white" />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Global Finance Planner
+                Finance Planner
               </h1>
             </div>
             <p className="text-xl text-gray-600">
-              Plan your finances anywhere in the world
+              Plane deine Finanzen weltweit
             </p>
           </div>
 
@@ -86,9 +82,9 @@ export default function SignInPage() {
                     <DollarSign className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">Multi-Currency Support</h3>
+                    <h3 className="font-semibold text-lg mb-1">Budget-Verwaltung</h3>
                     <p className="text-sm text-gray-600">
-                      Track expenses in 190+ countries with automatic currency conversion
+                      Erstelle und verwalte deine Budgets mit automatischer Berechnung
                     </p>
                   </div>
                 </div>
@@ -102,9 +98,9 @@ export default function SignInPage() {
                     <TrendingUp className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">Smart Analytics</h3>
+                    <h3 className="font-semibold text-lg mb-1">Ausgaben-Tracking</h3>
                     <p className="text-sm text-gray-600">
-                      AI-powered insights and automatic budget recommendations
+                      Behalte den Überblick über deine Ausgaben in Echtzeit
                     </p>
                   </div>
                 </div>
@@ -118,9 +114,9 @@ export default function SignInPage() {
                     <MapPin className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">Location-Based Costs</h3>
+                    <h3 className="font-semibold text-lg mb-1">Multi-Währung Support</h3>
                     <p className="text-sm text-gray-600">
-                      Automatic cost-of-living adjustments for your location
+                      Unterstützung für EUR, IDR und weitere Währungen
                     </p>
                   </div>
                 </div>
@@ -138,9 +134,9 @@ export default function SignInPage() {
                   <LogIn className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <CardTitle className="text-3xl font-bold text-center">Welcome Back</CardTitle>
+              <CardTitle className="text-3xl font-bold text-center">Willkommen zurück</CardTitle>
               <CardDescription className="text-center text-base">
-                Sign in to access your financial dashboard
+                Melde dich an um auf dein Dashboard zuzugreifen
               </CardDescription>
             </CardHeader>
 
@@ -160,7 +156,7 @@ export default function SignInPage() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your.email@example.com"
+                      placeholder="deine.email@beispiel.de"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
@@ -170,7 +166,7 @@ export default function SignInPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Passwort</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -193,12 +189,12 @@ export default function SignInPage() {
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                      Signing in...
+                      Wird angemeldet...
                     </>
                   ) : (
                     <>
                       <LogIn className="h-5 w-5 mr-2" />
-                      Sign In
+                      Anmelden
                     </>
                   )}
                 </Button>
@@ -209,7 +205,7 @@ export default function SignInPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">Or</span>
+                  <span className="bg-white px-2 text-gray-500">Oder</span>
                 </div>
               </div>
 
@@ -217,24 +213,16 @@ export default function SignInPage() {
                 <Link href="/auth/register">
                   <Button variant="outline" className="w-full">
                     <User className="h-4 w-4 mr-2" />
-                    Create New Account
+                    Neuen Account erstellen
                   </Button>
                 </Link>
               </div>
 
-              {/* Demo Credentials */}
+              {/* Info Box */}
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm font-semibold text-blue-900 mb-2">Demo Accounts:</p>
-                <div className="space-y-2 text-xs text-blue-800">
-                  <div className="flex justify-between">
-                    <span className="font-medium">Regular User:</span>
-                    <span>test@example.com / test123</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Admin Access:</span>
-                    <span>emir@admin.com / Mallman12</span>
-                  </div>
-                </div>
+                <p className="text-sm text-blue-900 text-center">
+                  Noch kein Konto? Registriere dich kostenlos und starte mit deiner Finanzplanung!
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -1,41 +1,38 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-/**
- * POST /api/auth/register
- * Register a new user
- */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    const body = await request.json();
+    const { email, password, name } = body;
 
     // Validation
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Email and password are required' },
+        { error: 'Email und Passwort sind erforderlich' },
         { status: 400 }
       );
     }
 
     if (password.length < 6) {
       return NextResponse.json(
-        { success: false, error: 'Password must be at least 6 characters' },
+        { error: 'Passwort muss mindestens 6 Zeichen lang sein' },
         { status: 400 }
       );
     }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email }
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: 'User with this email already exists' },
-        { status: 409 }
+        { error: 'Diese Email ist bereits registriert' },
+        { status: 400 }
       );
     }
 
@@ -47,27 +44,30 @@ export async function POST(request: Request) {
       data: {
         email,
         password: hashedPassword,
-        name: name || null,
+        name: name || email.split('@')[0],
+        emailVerified: new Date(), // Auto-verify for simplicity
       },
       select: {
         id: true,
         email: true,
         name: true,
         createdAt: true,
-      },
+      }
     });
 
     return NextResponse.json({
       success: true,
-      message: 'User created successfully',
-      user,
-    }, { status: 201 });
+      message: 'Registrierung erfolgreich',
+      user
+    });
 
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Register error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create user' },
+      { error: 'Fehler bei der Registrierung', details: String(error) },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

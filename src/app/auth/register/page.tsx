@@ -33,13 +33,13 @@ export default function RegisterPage() {
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passwörter stimmen nicht überein');
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Passwort muss mindestens 6 Zeichen lang sein');
       setLoading(false);
       return;
     }
@@ -57,44 +57,28 @@ export default function RegisterPage() {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          router.push('/auth/signin');
-        }, 2000);
-      } else {
-        setError(data.error || 'Registration failed');
+      if (!response.ok) {
+        setError(data.error || 'Registrierung fehlgeschlagen');
         setLoading(false);
+        return;
       }
+
+      // Registration successful
+      setSuccess(true);
+
+      // Wait 2 seconds then redirect to login
+      setTimeout(() => {
+        router.push('/auth/signin');
+      }, 2000);
+
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
       setLoading(false);
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-          <CardContent className="p-12 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="p-4 bg-green-100 rounded-full">
-                <CheckCircle className="h-16 w-16 text-green-600" />
-              </div>
-            </div>
-            <h2 className="text-3xl font-bold mb-4">Account Created!</h2>
-            <p className="text-gray-600 mb-6">
-              Your account has been successfully created. Redirecting to login...
-            </p>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 text-6xl opacity-10">🌍</div>
@@ -103,119 +87,48 @@ export default function RegisterPage() {
         <div className="absolute bottom-40 right-10 text-6xl opacity-10">🗺️</div>
       </div>
 
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
-        {/* Left Side - Benefits */}
-        <div className="hidden lg:flex flex-col justify-center space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-teal-500 rounded-full">
+      <div className="w-full max-w-4xl relative z-10">
+        <Card className="w-full max-w-md mx-auto border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
+          <CardHeader className="space-y-1 pb-6">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full">
                 <UserPlus className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-                Join Us Today
-              </h1>
             </div>
-            <p className="text-xl text-gray-600">
-              Start managing your global finances in minutes
-            </p>
-          </div>
+            <CardTitle className="text-3xl font-bold text-center">Account erstellen</CardTitle>
+            <CardDescription className="text-center text-base">
+              Erstelle deinen kostenlosen Finance Planner Account
+            </CardDescription>
+          </CardHeader>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Free Forever</h3>
-                <p className="text-sm text-gray-600">
-                  No credit card required. All features included.
-                </p>
-              </div>
-            </div>
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">190+ Countries</h3>
-                <p className="text-sm text-gray-600">
-                  Automatic cost data for anywhere in the world
-                </p>
-              </div>
-            </div>
+            {success && (
+              <Alert className="border-green-500 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  Registrierung erfolgreich! Du wirst zur Login-Seite weitergeleitet...
+                </AlertDescription>
+              </Alert>
+            )}
 
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Smart Budgeting</h3>
-                <p className="text-sm text-gray-600">
-                  AI-powered recommendations and insights
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Secure & Private</h3>
-                <p className="text-sm text-gray-600">
-                  Bank-level encryption for your data
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Multi-Currency</h3>
-                <p className="text-sm text-gray-600">
-                  Real-time exchange rates and conversion
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Registration Form */}
-        <div className="flex items-center justify-center">
-          <Card className="w-full max-w-md border-0 shadow-2xl bg-white/90 backdrop-blur-sm">
-            <CardHeader className="space-y-1 pb-6">
-              <div className="flex justify-center mb-4">
-                <div className="p-4 bg-gradient-to-r from-green-500 to-teal-500 rounded-full">
-                  <UserPlus className="h-8 w-8 text-white" />
-                </div>
-              </div>
-              <CardTitle className="text-3xl font-bold text-center">Create Account</CardTitle>
-              <CardDescription className="text-center text-base">
-                Sign up to start planning your finances
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
+            {!success && (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="name"
                       name="name"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Dein Name"
                       value={formData.name}
                       onChange={handleChange}
                       className="pl-10"
@@ -232,7 +145,7 @@ export default function RegisterPage() {
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="your.email@example.com"
+                      placeholder="deine.email@beispiel.de"
                       value={formData.email}
                       onChange={handleChange}
                       className="pl-10"
@@ -242,7 +155,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Passwort</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -256,11 +169,11 @@ export default function RegisterPage() {
                       required
                     />
                   </div>
-                  <p className="text-xs text-gray-500">Must be at least 6 characters</p>
+                  <p className="text-xs text-gray-500">Mindestens 6 Zeichen</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -278,44 +191,58 @@ export default function RegisterPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-6 text-lg"
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-6 text-lg"
                   disabled={loading}
                 >
                   {loading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                      Creating Account...
+                      Wird registriert...
                     </>
                   ) : (
                     <>
                       <UserPlus className="h-5 w-5 mr-2" />
-                      Create Account
+                      Account erstellen
                     </>
                   )}
                 </Button>
               </form>
+            )}
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">Already have an account?</span>
-                </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
               </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Oder</span>
+              </div>
+            </div>
 
+            <div className="space-y-4">
               <Link href="/auth/signin">
                 <Button variant="outline" className="w-full">
-                  Sign In
+                  <User className="h-4 w-4 mr-2" />
+                  Bereits registriert? Jetzt anmelden
                 </Button>
               </Link>
+            </div>
 
-              <p className="text-xs text-center text-gray-500">
-                By creating an account, you agree to our Terms of Service and Privacy Policy
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Info Box */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold mb-1">Kostenlos & Sicher</p>
+                  <ul className="list-disc list-inside text-xs text-blue-800 space-y-1">
+                    <li>Keine Kreditkarte erforderlich</li>
+                    <li>Deine Daten sind verschlüsselt</li>
+                    <li>Jederzeit kündbar</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

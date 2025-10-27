@@ -34,6 +34,7 @@ model User {
   expenses         Expense[]
   dailyBudgets     DailyBudget[]
   fixedCosts       FixedCost[]
+  budgetProfiles   BudgetProfile[]
   accounts         Account[]
   sessions         Session[]
 }
@@ -137,6 +138,28 @@ model FixedCost {
   endDate           DateTime?
   isActive          Boolean  @default(true)
   description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BudgetProfile {
+  id                String   @id @default(cuid())
+  userId            String
+  name              String
+  lifestyleLevel    String
+  duration          Int
+  persons           Int
+  totalBudget       Float
+  dailyBudget       Float
+  weeklyBudget      Float
+  monthlyBudget     Float
+  currency          String   @default("EUR")
+  budgetMode        String   @default("auto") // auto or manual
+  manualBudget      Float?
+  budgetPeriod      String?  // daily, weekly, monthly
+  categories        Json     // Store categories as JSON
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
