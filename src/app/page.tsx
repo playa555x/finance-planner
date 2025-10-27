@@ -71,6 +71,7 @@ import InstantBudgetPreview from '@/components/InstantBudgetPreview';
 import DetailedLocationInfo from '@/components/DetailedLocationInfo';
 import OnboardingTutorial from '@/components/OnboardingTutorial';
 import EditableBudgetCategory from '@/components/EditableBudgetCategory';
+import BudgetProfileManager from '@/components/BudgetProfileManager';
 import { useBackgroundLocationDetection } from '@/hooks/useBackgroundLocationDetection';
 
 interface FinancialPlan {
@@ -345,12 +346,51 @@ export default function BaliFinancePlanner() {
       };
       
       setPlan(enhancedPlan);
+
+      // Save to Budget Profile automatically
+      saveToBudgetProfile(enhancedPlan);
+
       setActiveTab('results');
     } catch (error) {
       console.error('Failed to calculate plan:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Save plan to budget profile
+  const saveToBudgetProfile = (planData: any) => {
+    const budgetProfile = {
+      id: Date.now().toString(),
+      name: `${planData.lifestyleLevel} Budget - ${new Date().toLocaleDateString('de-DE')}`,
+      lifestyleLevel: planData.lifestyleLevel,
+      duration: planData.duration,
+      persons: planData.persons,
+      totalBudget: planData.totalCostEUR,
+      dailyBudget: planData.totalCostEUR / planData.duration,
+      weeklyBudget: (planData.totalCostEUR / planData.duration) * 7,
+      monthlyBudget: (planData.totalCostEUR / planData.duration) * 30,
+      currency: 'EUR',
+      categories: planData.categories.map((cat: any) => ({
+        category: cat.category,
+        subcategory: cat.subcategory || cat.description || '',
+        dailyBudget: cat.monthlyEUR / 30,
+        weeklyBudget: (cat.monthlyEUR / 30) * 7,
+        monthlyBudget: cat.monthlyEUR,
+        icon: cat.icon?.name || 'DollarSign',
+        color: cat.color || 'bg-gray-500',
+        spent: 0
+      })),
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to localStorage
+    const existingProfiles = JSON.parse(localStorage.getItem('budgetProfiles') || '[]');
+    const updatedProfiles = [budgetProfile, ...existingProfiles];
+    localStorage.setItem('budgetProfiles', JSON.stringify(updatedProfiles));
+
+    // Show success message
+    console.log('✅ Budget-Profil gespeichert!', budgetProfile);
   };
 
   const exportPlan = async (format: 'excel' | 'pdf') => {
@@ -1480,20 +1520,7 @@ export default function BaliFinancePlanner() {
           </TabsContent>
 
           <TabsContent value="budget" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DailyBudgetManager
-                userId={currentUserId}
-                onBudgetUpdate={() => {}}
-              />
-              <ExpenseTracker
-                userId={currentUserId}
-                onExpenseUpdate={() => {}}
-              />
-            </div>
-            <FixedCostsManager
-              userId={currentUserId}
-              onFixedCostUpdate={() => {}}
-            />
+            <BudgetProfileManager onProfileSelect={(profile) => console.log('Profile selected:', profile)} />
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">
